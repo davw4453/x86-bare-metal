@@ -4,11 +4,16 @@
 
 ;Defines
 X86_START_ADDRESS equ 0x7c00
-KERNEL_OFFSET eq 0x1000                 ; The beginning of the C application will be loaded here.
+KERNEL_OFFSET equ 0x1000                 ; The beginning of the C application will be loaded here.
 STACK_ADDRESS equ 0x9000
 
-
+%ifndef ELF_GDB
 [org X86_START_ADDRESS]                 ; Start address
+%endif
+
+%ifdef ELF_GDB
+extern _start                           ; define external _start symbol if debugging.
+%endif
 
 [bits 16]
 _reset:
@@ -28,7 +33,7 @@ _reset:
 load_kernel:
     mov si, APP_CHECKPOINT                  ; copy the c app loading message into the si register.
     call print_string
-    
+
     mov bl, 1                               ; Put the number of sectors to read in 'bl'.
     call disk_load
     ret
@@ -39,12 +44,12 @@ load_kernel:
 %include "asm_lib_functions/gdt.asm"
 
 switch_to_pm:
-    cli
+    cli                                     ; disable interrupts indefinitely.
     lgdt [gdt_descriptor]                   ; Load GDT.
     mov eax, cr0
-    or eas, 0x1
+    or eax, 0x1
     mov cr0, eax                            ; PE bit enable
-    jmp CODE_SEG:start_pm                   ; execute far jump
+    jmp CODE_SEG:init_pm                    ; execute far jump
     jmp $                                   ; Never reached.
 
 [bits 32]
@@ -63,8 +68,20 @@ init_pm:
 pm_start:
     mov esi, PM_CHECKPOINT                  ; Print message indicating we are in protected mode.
     call print_pm_string
-    jmp $                
-    call KERNEL_OFFSET                      ; Jump to C application entrypoint
+
+choose_entrypoint:
+    %ifdef BOOTONLY                         ; Hangs here if building without the application code.
+    jmp $
+    %endif
+    
+    %ifndef ELF_GDB
+    call KERNEL_OFFSET                      ; Call kernel offset at the explicit address if not building for debug.
+    %endif
+
+    %ifdef ELF_GDB
+    call _start                             ; If linking everything together for debugging, call the _start symbol
+    %endif
+
     jmp $                                   ; Never reached.
 
 
@@ -81,7 +98,7 @@ PM_CHECKPOINT:
     db "Transitioned into 32-bit Protected mode", 0x0
 
 APP_CHECKPOINT:
-    db "Loading user application into memory...", 0x0
+    db "Loading user application into memory...", 0xa, 0xd, 0x0
 
 ; Boot sector padding
 times 510-($-$$) db 0x0

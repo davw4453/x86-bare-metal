@@ -1,5 +1,5 @@
 ;
-; Load `dh` sectors to `es:bx` from drive `dl`.
+; Load `bl` sectors to `es:bx` from drive `dl`.
 ; David Wrinn
 ; Referenced: https://github.com/lukearend/x86-bootloader/
 

@@ -9,7 +9,7 @@ AMBER_ON_BLACK equ 0x06              ; Character attribute value.
 print_pm_string:
     pushad                          ; pusha = 16-bit, pushad = 32-bit
     mov edx, VIDEO_MEMORY
-    add edx, 0x5A0                  ; Move down 9 lines. 80 chars per line * 2 bytes per char = 160 * 9 lines = 1440 dec or 0x5A0 hex.
+    add edx, 0x640                  ; Move down 9 lines. 80 chars per line * 2 bytes per char = 160 * 10 lines = 1600 dec or 0x640 hex.
 
 print_pm_string_loop:
     mov al, [esi]                   ; Point to the beginning of the string in al
