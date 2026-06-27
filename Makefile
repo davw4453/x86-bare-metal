@@ -12,7 +12,7 @@ ASM_SRC_DIR 		= C-app_32
 
 # Define memory offsetts
 BOOT_BEGIN 			= 0x7c00	#x86 loads the MBR boot sector at this address.
-C_APP_BEGIN			= 0x1000	# The user program entrypoint will be here.
+C_APP_BEGIN			= 0x7E00	# The user program entrypoint will be here.
 
 
 
@@ -30,7 +30,7 @@ release32: clean
 	$(LD) -melf_i386 -o $(BUILD_DIR32)/main.bin -Ttext $(C_APP_BEGIN) \
 		--oformat binary $(BUILD_DIR32)/enter_c_main.o $(BUILD_DIR32)/main.o		# Link them together.
 	
-	@cat $(BUILD_DIR32)/boot.bin $(BUILD_DIR32)/main.bin > $(BUILD_DIR32)/image.bin	# stitch the two images together.
+	@cat $(BUILD_DIR32)/boot.bin $(BUILD_DIR32)/main.bin > $(BUILD_DIR32)/image32.bin	# stitch the two images together.
 
 
 # Builds the bootloader without the application code.
@@ -42,7 +42,7 @@ boot32: clean
 	@cat $(BUILD_DIR32)/boot.bin $(BUILD_DIR32)/sector_zero.bin > $(BUILD_DIR32)/image.bin	# stitch the two images together.
 
 run32:
-	$(QEMU) -drive format=raw,file=$(BUILD_DIR32)/image.bin -nic none
+	$(QEMU) -drive format=raw,file=$(BUILD_DIR32)/image32.bin -nic none
 
 debug32: clean
 	@echo "---> Building 32-bit Debug..."

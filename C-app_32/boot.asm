@@ -4,7 +4,7 @@
 
 ;Defines
 X86_START_ADDRESS equ 0x7c00
-KERNEL_OFFSET equ 0x1000                 ; The beginning of the C application will be loaded here.
+KERNEL_OFFSET equ 0x7E00                ; The beginning of the C application will be loaded here.
 STACK_ADDRESS equ 0x9000
 
 %ifndef ELF_GDB
@@ -36,8 +36,9 @@ load_kernel:
 
     ; To calculate the physical address:      Physical Address = (segment x 16) + offset.
     mov ax, X86_START_ADDRESS               ; Set the explicit segment register to the start address.
-    shr ax, 1
-    mov es, ax                              ; Shift to the right to make 0x07c0 from 0x7c00.
+    shr ax, 1                               ; Shift to the right to make 0x07c0 from 0x7c00.
+                                            ; Doing the calculation instead of using KERNEL_OFFSET to demonstrate the calculation.
+    mov es, ax                              
     mov bx, 0x0200                          ; Offset the destination by exactly 512 bytes.
                                             ; The linker places our C code immediately after the 512 byte boot sector.
     
