@@ -68,7 +68,10 @@ debug-run32:
 
 
 clean: 
-	@rm -f $(BUILD_DIR32)/* 
+	@rm -f $(BUILD_DIR32)/*.o
+	@rm -f $(BUILD_DIR32)/*.bin
+	@rm -f $(BUILD_DIR32)/*.elf
+
 
 
 .PHONY: all release32 debug32 boot32 run32 clean
