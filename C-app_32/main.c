@@ -6,13 +6,14 @@
 
 int main()
 {
-    //char* video_memory = (char*) 0xb8000;
-    //video_memory = video_memory + 1760;
-    //*video_memory = 'X';
+    char* video_memory = (char*) 0xb8000;
+    video_memory = video_memory + 1760;
+    *video_memory = 'X';
 
+    int i = 0;
     while(1)
     {
-        __asm__ __volatile__("jmp ."); // Jump to the current instruction forever
+        i = 1;
     }
     return 0; 
 }

@@ -34,6 +34,13 @@ load_kernel:
     mov si, APP_CHECKPOINT                  ; copy the c app loading message into the si register.
     call print_string
 
+    ; To calculate the physical address:      Physical Address = (segment x 16) + offset.
+    mov ax, X86_START_ADDRESS               ; Set the explicit segment register to the start address.
+    shr ax, 1
+    mov es, ax                              ; Shift to the right to make 0x07c0 from 0x7c00.
+    mov bx, 0x0200                          ; Offset the destination by exactly 512 bytes.
+                                            ; The linker places our C code immediately after the 512 byte boot sector.
+    
     mov bl, 1                               ; Put the number of sectors to read in 'bl'.
     call disk_load
     ret
