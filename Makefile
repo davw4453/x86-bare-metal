@@ -46,24 +46,31 @@ run32:
 
 debug32: clean
 	@echo "---> Building 32-bit Debug..."
-	$(AS) $(ASM_SRC_DIR)/boot.asm -f elf32 -g -F dwarf -dELF_GDB -o $(BUILD_DIR32)/boot.o	# Assemble bootloader into elf format.
-																							# include gdb debug symbols.
+	$(AS) $(ASM_SRC_DIR)/boot.asm -f elf32 -g -F dwarf -dELF_GDB -o $(BUILD_DIR32)/boot.o					# Assemble bootloader into elf format.
+																											# include gdb debug symbols.
 
 	$(AS) $(ASM_SRC_DIR)/enter_c_main.asm -f elf32 -g -F dwarf -dELF_GDB -o $(BUILD_DIR32)/enter_c_main.o	# Assemble entrypoint stub into elf format.
-	$(CC) -m32 -O0 -ffreestanding -g -c $(C_SRC_DIR)/main.c -o $(BUILD_DIR32)/main.o							# Compile main.c with debug symbols, no optimization.
+	$(CC) -m32 -O0 -ffreestanding -g -c $(C_SRC_DIR)/main.c -o $(BUILD_DIR32)/main.o						# Compile main.c with debug symbols, no optimization.
+	$(CC) -m32 -O0 -ffreestanding -g -c $(C_SRC_DIR)/my_stdio.c -o $(BUILD_DIR32)/my_stdio.o
 
 	# Link them all together.
-	$(LD) -melf_i386 -Ttext $(BOOT_BEGIN) \
+	# -N option prevents the liker from placing .data section variables (global) far in the binary.
+	$(LD) -melf_i386 -N -Ttext $(BOOT_BEGIN) \
 		$(BUILD_DIR32)/boot.o \
 		$(BUILD_DIR32)/enter_c_main.o \
 		$(BUILD_DIR32)/main.o \
+		$(BUILD_DIR32)/my_stdio.o \
 		-o $(BUILD_DIR32)/image32.elf
 
-	$(OBJCOPY) -O binary $(BUILD_DIR32)/image32.elf $(BUILD_DIR32)/image32.bin								# strip to bin for Qemu.
+
+	# strip to bin for Qemu.
+	# Pad to 1024 to be an exact 512 byte sector multiple.	
+	# 0x7c00 + (2*0x200) + 1 
+	$(OBJCOPY) -O binary --pad-to=0x8001 $(BUILD_DIR32)/image32.elf $(BUILD_DIR32)/image32.bin
 
 debug-run32:
 	$(QEMU) -drive format=raw,file=$(BUILD_DIR32)/image32.bin -s -S -nic none &
-	konsole -e gdb -x .gdbinit2
+	konsole -e gdb -x .gdbinit2							# Change if the host's terminal emulator is not konsole.
 	
 
 

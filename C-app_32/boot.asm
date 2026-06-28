@@ -42,7 +42,7 @@ load_kernel:
     mov bx, 0x0200                          ; Offset the destination by exactly 512 bytes.
                                             ; The linker places our C code immediately after the 512 byte boot sector.
     
-    mov bl, 1                               ; Put the number of sectors to read in 'bl'.
+    mov bl, 2                               ; Put the number of sectors to read in 'bl'.
     call disk_load
     ret
 
